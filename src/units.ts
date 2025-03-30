@@ -40,10 +40,15 @@ export function getDataRangeFromSheet(workbook: xlsx.WorkBook, sheetName: string
         }
         result.push(currentRow);
     }
-
+    console.log("RESULT >>>", result);
     return result;
 }
 
 export function stringifyTableAsTSV(table: string[][]): string {
-    return table.map(row => row.join("\t")).join("\n");
-}
+    console.log("Я тут");
+    // console.log("TABLE >>>", table);
+    return table
+      .map(row => row.map(cell => cell ?? "").join("\t")) // замінює undefined/null на ""
+      .join("\n");
+  }
+  

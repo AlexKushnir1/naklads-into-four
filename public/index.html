@@ -1,30 +1,45 @@
 <!DOCTYPE html>
 <html lang="uk">
-<head>
-  <meta charset="UTF-8" />
-  <title>Обробка накладних</title>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .naklad-container { margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; }
-    .button-group { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; }
-    button { padding: 6px 12px; cursor: pointer; }
-  </style>
-</head>
-<body>
-  <h1>Завантаження накладних</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Обробка накладних</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        padding: 20px;
+      }
+      .naklad-container {
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        padding: 10px;
+      }
+      .button-group {
+        margin-top: 20px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      button {
+        padding: 6px 12px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Завантаження накладних</h1>
 
-  <div id="nakladny-container"></div>
-  <button onclick="addNakladnaField()">+ Додати накладну</button>
-  <br /><br />
-  <button onclick="processAll()">Опрацювати</button>
+    <div id="nakladny-container"></div>
+    <button onclick="addNakladnaField()">+ Додати накладну</button>
+    <br /><br />
+    <button onclick="processAll()">Опрацювати</button>
 
-  <div class="button-group" id="copy-buttons"></div>
+    <div class="button-group" id="copy-buttons"></div>
 
-  <script>
-    function addNakladnaField() {
-      const container = document.createElement("div");
-      container.className = "naklad-container";
-      container.innerHTML = `
+    <script>
+      function addNakladnaField() {
+        const container = document.createElement("div");
+        container.className = "naklad-container";
+        container.innerHTML = `
         <input type="file" accept=".xlsx,.xlsm" required />
         <select>
           <option value="приход">прихід</option>
@@ -32,71 +47,75 @@
         </select>
         <input type="text" placeholder="Колонка (напр. C4)" maxlength="3" required />
       `;
-      document.getElementById("nakladny-container").appendChild(container);
-    }
-
-    async function processAll() {
-      const containers = document.querySelectorAll(".naklad-container");
-      const formData = new FormData();
-      const meta = [];
-
-      let fileIndex = 0;
-      for (const container of containers) {
-        const fileInput = container.querySelector("input[type='file']");
-        const operation = container.querySelector("select").value;
-        const cell = container.querySelector("input[type='text']").value.trim().toUpperCase();
-
-        if (!fileInput.files.length || !cell) continue;
-
-        const file = fileInput.files[0];
-        formData.append("nakladni", file); // той самий key, бо upload.array("nakladni")
-
-        meta.push({ operation, cell });
-        fileIndex++;
+        document.getElementById("nakladny-container").appendChild(container);
       }
 
-      formData.append("meta", JSON.stringify(meta));
+      async function processAll() {
+        const containers = document.querySelectorAll(".naklad-container");
+        const formData = new FormData();
+        const meta = [];
 
-      const res = await fetch("/api/process-nakladni", {
-        method: "POST",
-        body: formData,
-      });
+        for (const container of containers) {
+          const fileInput = container.querySelector("input[type='file']");
+          const operation = container.querySelector("select").value;
+          const cell = container
+            .querySelector("input[type='text']")
+            .value.trim()
+            .toUpperCase();
 
-      if (!res.ok) {
-        alert("Помилка при обробці накладних");
-        return;
-      }
-      console.log("👉 Результат TSV для zagalna НАДІЙШЛО:\n", response.zagalna["НАДІЙШЛО"]);
-      const data = await res.json();
-      renderCopyButtons(data);
-    }
+          if (!fileInput.files.length || !cell) continue;
 
-    function renderCopyButtons(data) {
-      const buttonsDiv = document.getElementById("copy-buttons");
-      buttonsDiv.innerHTML = "";
+          const file = fileInput.files[0];
+          formData.append("nakladni", file);
+          meta.push({ operation, cell });
+        }
 
-      const labels = {
-        zagalna: "Загальна",
-        khmilnyk: "Хмільник",
-        koziatyn: "Козятин",
-        kalynivka: "Калинівка",
-      };
+        formData.append("meta", JSON.stringify(meta));
 
-      for (const key of Object.keys(data)) {
-        ["НАДІЙШЛО", "ВИБУЛО"].forEach((sheet) => {
-          const btn = document.createElement("button");
-          btn.innerText = `${labels[key]}: ${sheet}`;
-          btn.onclick = () => {
-            navigator.clipboard.writeText(data[key][sheet]);
-            alert(`Скопійовано: ${labels[key]} - ${sheet}`);
-          };
-          buttonsDiv.appendChild(btn);
+        const res = await fetch("/api/process-nakladni", {
+          method: "POST",
+          body: formData,
         });
-      }
-    }
 
-    // Додай одне поле одразу
-    addNakladnaField();
-  </script>
-</body>
+        if (!res.ok) {
+          alert("Помилка при обробці накладних");
+          return;
+        }
+
+        const data = await res.json(); // отримай дані спочатку!
+        console.log(
+          "👉 Результат TSV для zagalna НАДІЙШЛО:\n",
+          data.zagalna?.["НАДІЙШЛО"]
+        );
+        renderCopyButtons(data);
+      }
+
+      function renderCopyButtons(data) {
+        const buttonsDiv = document.getElementById("copy-buttons");
+        buttonsDiv.innerHTML = "";
+
+        const labels = {
+          zagalna: "Загальна",
+          khmilnyk: "Хмільник",
+          koziatyn: "Козятин",
+          kalynivka: "Калинівка",
+        };
+
+        for (const key of Object.keys(data)) {
+          ["НАДІЙШЛО", "ВИБУЛО"].forEach((sheet) => {
+            const btn = document.createElement("button");
+            btn.innerText = `${labels[key]}: ${sheet}`;
+            btn.onclick = () => {
+              navigator.clipboard.writeText(data[key][sheet]);
+              alert(`Скопійовано: ${labels[key]} - ${sheet}`);
+            };
+            buttonsDiv.appendChild(btn);
+          });
+        }
+      }
+
+      // Додай одне поле одразу
+      addNakladnaField();
+    </script>
+  </body>
 </html>
