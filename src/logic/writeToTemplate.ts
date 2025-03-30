@@ -19,8 +19,6 @@ export function writeToTemplate(
   const worksheet = workbook.Sheets[sheetName];
 
   console.log("➡ Вставка в аркуш:", sheetName);
-  console.log("🧾 Колонка:", columnLetter);
-  console.log("🗂️ Кількість елементів:", dataMap.size);
 
   if (!worksheet) {
     throw new Error(`Аркуш "${sheetName}" не знайдено в Excel-файлі.`);
@@ -30,8 +28,6 @@ export function writeToTemplate(
 
   for (const [, quantity] of dataMap) {
     const cell = `${columnLetter}${row}`;
-    console.log("➡ Вставка у клітинку:", cell);
-    console.log("➡ Значення:", quantity);
     xlsx.utils.sheet_add_aoa(worksheet, [[quantity]], {origin: cell});
     row++;
   }
