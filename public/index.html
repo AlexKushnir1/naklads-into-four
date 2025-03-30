@@ -12,6 +12,17 @@
         margin-bottom: 20px;
         border: 1px solid #ccc;
         padding: 10px;
+        position: relative;
+      }
+      .naklad-container button.remove {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 4px 8px;
+        cursor: pointer;
       }
       .button-group {
         margin-top: 20px;
@@ -40,13 +51,14 @@
         const container = document.createElement("div");
         container.className = "naklad-container";
         container.innerHTML = `
-        <input type="file" accept=".xlsx,.xlsm" required />
-        <select>
-          <option value="приход">прихід</option>
-          <option value="відход">відхід</option>
-        </select>
-        <input type="text" placeholder="Колонка (напр. C4)" maxlength="3" required />
-      `;
+          <button class="remove" onclick="this.parentElement.remove()">🗑 Видалити</button>
+          <input type="file" accept=".xlsx,.xlsm" required />
+          <select>
+            <option value="приход">прихід</option>
+            <option value="відход">відхід</option>
+          </select>
+          <input type="text" placeholder="Колонка (напр. C4)" maxlength="3" required />
+        `;
         document.getElementById("nakladny-container").appendChild(container);
       }
 
@@ -58,10 +70,7 @@
         for (const container of containers) {
           const fileInput = container.querySelector("input[type='file']");
           const operation = container.querySelector("select").value;
-          const cell = container
-            .querySelector("input[type='text']")
-            .value.trim()
-            .toUpperCase();
+          const cell = container.querySelector("input[type='text']").value.trim().toUpperCase();
 
           if (!fileInput.files.length || !cell) continue;
 
@@ -82,11 +91,8 @@
           return;
         }
 
-        const data = await res.json(); // отримай дані спочатку!
-        console.log(
-          "👉 Результат TSV для zagalna НАДІЙШЛО:\n",
-          data.zagalna?.["НАДІЙШЛО"]
-        );
+        const data = await res.json();
+        console.log("👉 Результат TSV для zagalna НАДІЙШЛО:\n", data.zagalna?.["НАДІЙШЛО"]);
         renderCopyButtons(data);
       }
 
