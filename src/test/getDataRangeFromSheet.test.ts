@@ -1,6 +1,6 @@
 import * as path from "path";
 import * as xlsx from "xlsx";
-import { getDataRangeFromSheet, stringifyTableAsTSV } from "../units";
+import { getDataRangeFromSheet } from "../units";
 
 describe("getDataRangeFromSheet", () => {
     const filePath = path.resolve(__dirname, "../../data/zagalna.xlsx"); // або інший файл

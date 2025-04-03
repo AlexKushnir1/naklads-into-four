@@ -18,8 +18,6 @@ export function writeToTemplate(
   const sheetName = operation === "приход" ? "НАДІЙШЛО" : "ВИБУЛО";
   const worksheet = workbook.Sheets[sheetName];
 
-  console.log("➡ Вставка в аркуш:", sheetName);
-
   if (!worksheet) {
     throw new Error(`Аркуш "${sheetName}" не знайдено в Excel-файлі.`);
   }

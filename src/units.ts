@@ -40,15 +40,24 @@ export function getDataRangeFromSheet(workbook: xlsx.WorkBook, sheetName: string
         }
         result.push(currentRow);
     }
-    console.log("RESULT >>>", result);
     return result;
 }
 
 export function stringifyTableAsTSV(table: string[][]): string {
-    console.log("Я тут");
-    // console.log("TABLE >>>", table);
     return table
-      .map(row => row.map(cell => cell ?? "").join("\t")) // замінює undefined/null на ""
-      .join("\n");
-  }
-  
+        .map(row =>
+            row
+                .map(cell => {
+                    const value = (cell ?? "").trim(); // обрізаємо пробіли
+
+                    // Якщо це виглядає як десяткове число — замінюємо крапку на кому
+                    if (/^\d+(\.\d+)?$/.test(value)) {
+                        return value.replace(".", ",");
+                    }
+
+                    return value;
+                })
+                .join("\t")
+        )
+        .join("\n");
+}
